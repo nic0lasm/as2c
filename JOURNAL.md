@@ -18,3 +18,10 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 - Ajouté : `.github/workflows/deploy.yml` (envoi FTP automatique de `www/` vers OVH à chaque commit), `README.md`.
 - Fichiers du site modifiés : aucun.
 - Mise en ligne : automatique (premier envoi = site complet).
+
+## 13/10/2026 — Nouveau numéro de téléphone
+- Demande : remplacer partout le numéro de téléphone par 06 69 06 25 25.
+- Modifié : 187 pages (texte « 04 81 68 50 55 » et liens d'appel `tel:+33481685055`).
+- Outil ajouté : `outils/remplacer.py`.
+- Sauvegarde : `as2c-sauvegardes/2026-10-13_144648_telephone-0669062525/`.
+- Mise en ligne : automatique via GitHub.
