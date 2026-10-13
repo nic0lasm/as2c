@@ -1,0 +1,68 @@
+# AS2C Patrimoine - Configuration Apache (OVH)
+
+# === Erreurs ===
+ErrorDocument 404 /404.html
+
+# === Compression ===
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json text/xml application/xml image/svg+xml
+</IfModule>
+
+# === Cache navigateur ===
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/html "access plus 1 hour"
+  ExpiresByType application/xml "access plus 1 day"
+</IfModule>
+
+# === Cache-Control ===
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|jpg|jpeg|png|webp|svg|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=3600"
+  </FilesMatch>
+</IfModule>
+
+# === Securite ===
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header set Strict-Transport-Security "max-age=31536000"
+  Header set Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data:; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self' formspree.io"
+</IfModule>
+
+# Empeche le listage des dossiers (ex: /assets/img/)
+Options -Indexes
+
+# Protection des fichiers caches (sauf .well-known, nécessaire à la
+# validation des certificats SSL Let's Encrypt)
+<FilesMatch "^\.(?!well-known)">
+  Require all denied
+</FilesMatch>
+
+# === Force HTTPS (sauf validation Let's Encrypt, servie en clair) ===
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} !^/\.well-known/
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# === Redirections nous-contacter -> contact ===
+RewriteRule ^nous-contacter/?$ /contact.html [L,R=301]
+
+# === Redirections anciennes URL accentuées (doublons) -> versions canoniques ===
+RewriteRule ^politique-confidentialité\.html$ /politique-confidentialite.html [L,R=301]
+RewriteRule ^simulateur-défiscalisation\.html$ /simulateur-defiscalisation.html [L,R=301]
+
+# === Reorganisation interne (les URL publiques ne changent pas) ===
+RewriteRule ^(details-.+\.html)$ articles/$1 [L]
+RewriteRule ^(gestion-de-patrimoine-.+\.html)$ categories/$1 [L]

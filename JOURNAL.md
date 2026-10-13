@@ -1,0 +1,20 @@
+# Journal des modifications du site AS2C
+
+Chaque entrée : date, demande, fichiers modifiés, sauvegarde, fichiers à envoyer sur OVH.
+Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en été, moins 1 h en hiver).
+
+---
+
+## 13/10/2026 — Mise en place du suivi
+- Demande : analyser le site et mettre en place un système de mise à jour depuis la discussion.
+- Fichiers du site modifiés : **aucun**.
+- Ajoutés (hors site) : `CLAUDE-NOTES.md`, `JOURNAL.md`, `outils/sauvegarder.sh`, `outils/verifier.py`.
+- Sauvegarde : `as2c-sauvegardes/2026-10-13_140723_initiale-site-complet/www.zip` (site complet).
+- À envoyer sur OVH : rien.
+
+## 13/10/2026 — Publication automatique via GitHub
+- Demande : que les modifications dictées soient mises en ligne directement.
+- Le dépôt GitHub `nic0lasm/as2c` contient maintenant ce dossier (l'ancienne version à plat reste dans l'historique Git).
+- Ajouté : `.github/workflows/deploy.yml` (envoi FTP automatique de `www/` vers OVH à chaque commit), `README.md`.
+- Fichiers du site modifiés : aucun.
+- Mise en ligne : automatique (premier envoi = site complet).

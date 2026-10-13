@@ -1,0 +1,28 @@
+# Publie automatiquement le dossier www sur l'hébergement OVH à chaque envoi sur la branche main.
+# Les accès FTP ne sont PAS dans ce fichier : ils sont dans les "secrets" du dépôt GitHub
+# (Settings > Secrets and variables > Actions) : OVH_FTP_SERVER, OVH_FTP_USER, OVH_FTP_PASSWORD, OVH_FTP_DIR.
+name: Publication sur OVH
+
+on:
+  push:
+    branches: [main]
+    paths: ['www/**']
+  workflow_dispatch:
+
+concurrency: deploy-ovh
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Envoi FTP des fichiers modifiés
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.OVH_FTP_SERVER }}
+          username: ${{ secrets.OVH_FTP_USER }}
+          password: ${{ secrets.OVH_FTP_PASSWORD }}
+          local-dir: ./www/
+          server-dir: ${{ secrets.OVH_FTP_DIR }}
+          # Premier envoi : ne supprime rien en ligne, n'envoie que les différences ensuite.
+          dangerous-clean-slate: false
