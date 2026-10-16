@@ -38,3 +38,9 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 - Non modifié : sebastien.maigre@as2cpatrimoine.com, présent une fois dans l'article « À vendre T2 Villeurbanne » (n° 103).
 - Sauvegarde : `as2c-sauvegardes/2026-10-16_100130_email-contact-avec-tiret/`.
 - Mise en ligne : automatique via GitHub.
+
+## 16/10/2026 — Adresse e-mail : sebastien.maigre@as2c-patrimoine.com
+- Demande : contact@ n'existe plus, mettre sebastien.maigre@as2c-patrimoine.com partout.
+- Modifié : 187 pages, 386 occurrences (385 contact@as2c-patrimoine.com + 1 sebastien.maigre@as2cpatrimoine.com dans l'article n° 103).
+- Sauvegarde : `as2c-sauvegardes/2026-10-16_100226_email-sebastien-maigre-avec-tiret/`.
+- Mise en ligne : automatique via GitHub.
