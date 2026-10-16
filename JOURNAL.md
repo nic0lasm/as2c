@@ -26,9 +26,8 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 - Sauvegarde : `as2c-sauvegardes/2026-10-13_144648_telephone-0669062525/`.
 - Mise en ligne : automatique via GitHub.
 
-## 16/10/2026 — Nouvelle adresse e-mail
-- Demande : remplacer contact@ par sebastien.maigre@ partout (bloc « Prendre RDV » et ailleurs).
-- Modifié : 187 pages, 385 occurrences de contact@as2cpatrimoine.com remplacées par sebastien.maigre@as2cpatrimoine.com (texte, liens mailto, données Google).
-- Note : domaine conservé sans tiret (as2cpatrimoine.com), comme le reste du site.
-- Sauvegarde : `as2c-sauvegardes/2026-10-16_095208_email-sebastien-maigre/`.
+## 16/10/2026 — Nouvelle adresse e-mail (annulée)
+- Demande : remplacer contact@ par sebastien.maigre@ partout, puis annulation demandée par Nico quelques minutes après.
+- Le passage à sebastien.maigre@as2cpatrimoine.com a été publié puis annulé : les 187 pages sont revenues à contact@as2cpatrimoine.com.
+- Sauvegarde utilisée : `as2c-sauvegardes/2026-10-16_095208_email-sebastien-maigre/`.
 - Mise en ligne : automatique via GitHub.
