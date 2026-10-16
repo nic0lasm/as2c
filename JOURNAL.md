@@ -31,3 +31,10 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 - Le passage à sebastien.maigre@as2cpatrimoine.com a été publié puis annulé : les 187 pages sont revenues à contact@as2cpatrimoine.com.
 - Sauvegarde utilisée : `as2c-sauvegardes/2026-10-16_095208_email-sebastien-maigre/`.
 - Mise en ligne : automatique via GitHub.
+
+## 16/10/2026 — Adresse e-mail avec tiret
+- Demande : afficher contact@as2c-patrimoine.com (avec tiret) partout, choix confirmé par Nico.
+- Modifié : 187 pages, 385 occurrences de contact@as2cpatrimoine.com (texte, liens mailto, données Google).
+- Non modifié : sebastien.maigre@as2cpatrimoine.com, présent une fois dans l'article « À vendre T2 Villeurbanne » (n° 103).
+- Sauvegarde : `as2c-sauvegardes/2026-10-16_100130_email-contact-avec-tiret/`.
+- Mise en ligne : automatique via GitHub.
