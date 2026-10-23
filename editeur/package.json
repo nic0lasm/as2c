@@ -1,0 +1,20 @@
+{
+  "name": "as2c-editeur",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types test/*.test.ts",
+    "configurer-agent": "node scripts/configurer-agent.mjs",
+    "deployer": "wrangler deploy"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.137.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261006.1",
+    "typescript": "5.9.3",
+    "wrangler": "4.148.0"
+  }
+}
