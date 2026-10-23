@@ -5,6 +5,11 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 
 ---
 
+## 23/10/2026 — Citation de la page d'accueil
+- Demande : remplacer « autant que j'apprécie de vous le fournir » par « autant que j'apprécie vous le fournir » dans la citation de l'accueil.
+- Fichiers du site modifiés : `www/index.html`.
+- Préparé depuis la page d'édition.
+
 ## 13/10/2026 — Mise en place du suivi
 - Demande : analyser le site et mettre en place un système de mise à jour depuis la discussion.
 - Fichiers du site modifiés : **aucun**.
