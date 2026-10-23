@@ -36,10 +36,10 @@ export function page(nonce: string): string {
     </nav>
   </header>
   <section id="fil" aria-live="polite">
-    <div class="accueil" id="accueil">
-      <p><strong>Bonjour Sébastien.</strong> Dites-moi ce que vous voulez changer sur le site, en quelques mots.</p>
-      <p>Par exemple : « Sur la page Qui sommes-nous, remplace le deuxième paragraphe par… », « Ajoute un article sur la SCPI avec ce texte… », « Change les horaires dans le pied de page ».</p>
-      <p>Je vous montre toujours le changement avant de le publier. Rien n'est mis en ligne sans votre accord, et tout peut être annulé.</p>
+    <div class="bulle claude" id="accueil">
+      <p><strong>Bonjour Sébastien,</strong> je suis votre assistant personnel pour le site AS2C. Je m'occupe de le modifier pour vous, selon vos instructions.</p>
+      <p>Dites-moi simplement ce que vous voulez changer, par exemple : « Sur la page Qui sommes-nous, remplace le deuxième paragraphe par… » ou « Ajoute un article sur la SCPI avec ce texte… ».</p>
+      <p>Je vous montre toujours le changement avant de le faire. Une fois prêt, vous choisirez : <strong>le publier directement sur le site</strong>, ou <strong>demander à Nicolas de le relire</strong>.</p>
     </div>
   </section>
   <p id="statut" class="statut" hidden><span class="point"></span><span id="statut-texte">Claude travaille…</span>
@@ -78,8 +78,16 @@ header { display: flex; justify-content: space-between; align-items: center; gap
 header strong { color: var(--bleu); margin-right: 10px; }
 header a { color: var(--gris); font-size: .9rem; }
 #fil { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.accueil { color: var(--gris); }
-.accueil strong { color: var(--texte); }
+.choix { align-self: stretch; background: #fff; border: 2px solid var(--or); border-radius: 12px; padding: 14px 16px; }
+.choix h2 { margin: 0 0 6px; font-size: 1rem; color: var(--bleu); }
+.choix p { margin: 0 0 8px; }
+.choix ul { margin: 0 0 12px; padding-left: 1.2em; color: var(--gris); }
+.boutons { display: flex; flex-wrap: wrap; gap: 8px; }
+.boutons button { flex: 1 1 220px; padding: 12px 14px; font-weight: 600; }
+.boutons .relire { background: #fff; color: var(--bleu); border: 2px solid var(--bleu); }
+.boutons .relire:hover { background: #eef2f7; }
+.choix .encore { margin-top: 8px; }
+.choix .fait { color: var(--gris); font-style: italic; margin: 0; }
 .bulle { max-width: 88%; padding: 10px 14px; border-radius: 12px; white-space: normal; overflow-wrap: anywhere; }
 .bulle p { margin: 0 0 .6em; } .bulle p:last-child { margin: 0; }
 .bulle ul { margin: .2em 0 .6em; padding-left: 1.2em; }
@@ -135,7 +143,6 @@ function mettreEnForme(texte) {
 }
 
 function ajouter(role, texte) {
-  $("accueil").hidden = true;
   const div = document.createElement("div");
   div.className = "bulle " + role;
   div.innerHTML = role === "info" ? echapper(texte) : mettreEnForme(texte);
@@ -147,7 +154,41 @@ function travail(actif, texte) {
   occupe = actif;
   $("statut").hidden = !actif;
   $("statut-texte").textContent = texte || "Claude travaille…";
-  $("envoyer").disabled = actif;
+  $("envoyer").disabled = actif || attente;
+}
+
+// Une proposition prête attend un des deux boutons : la zone de saisie est bloquée en attendant.
+let attente = false;
+function bloquerSaisie(oui) {
+  attente = oui;
+  $("texte").disabled = oui;
+  $("texte").placeholder = oui ? "Choisissez une des options ci-dessus." : "Votre demande…";
+  $("envoyer").disabled = oui || occupe;
+}
+
+function afficherChoix(c) {
+  const carte = document.createElement("div");
+  carte.className = "choix";
+  carte.innerHTML = "<h2>La modification est prête</h2><p>" + echapper(c.resume) + "</p>" +
+    (c.pages.length ? "<ul>" + c.pages.map((p) => "<li>" + echapper(p) + "</li>").join("") + "</ul>" : "") +
+    '<div class="boutons"><button type="button" class="publier">Je veux publier directement sur le site</button>' +
+    '<button type="button" class="relire">Je veux demander à Nicolas de relire</button></div>' +
+    '<button type="button" class="discret encore">Je veux encore changer quelque chose</button>';
+  const decider = async (choix, libelle, attenteTexte) => {
+    carte.querySelectorAll("button").forEach((b) => (b.disabled = true));
+    carte.querySelector(".boutons").outerHTML = '<p class="fait">Votre choix : ' + echapper(libelle) + "</p>";
+    carte.querySelector(".encore").remove();
+    bloquerSaisie(false);
+    travail(true, attenteTexte);
+    try { await lireFlux(await api("choix", { id: c.id, choix })); }
+    catch { ajouter("info", "La connexion a été coupée. Rechargez la page pour voir où en est Claude."); travail(false); }
+  };
+  carte.querySelector(".publier").addEventListener("click", () => decider("publier", "publier directement sur le site", "Publication en cours…"));
+  carte.querySelector(".relire").addEventListener("click", () => decider("relire", "demander à Nicolas de relire", "Envoi de la demande à Nicolas…"));
+  carte.querySelector(".encore").addEventListener("click", () => decider("modifier", "encore changer quelque chose", "Claude vous écoute…"));
+  fil.appendChild(carte);
+  fil.scrollTop = fil.scrollHeight;
+  bloquerSaisie(true);
 }
 
 async function lireFlux(reponse) {
@@ -172,13 +213,14 @@ async function lireFlux(reponse) {
       try { e = JSON.parse(ligne); } catch { continue; }
       if (e.t === "texte") { ajouter("claude", e.texte); travail(true); }
       else if (e.t === "outil") travail(true, e.resume + "…");
-      else if (e.t === "erreur") ajouter("info", e.message);
+      else if (e.t === "choix") afficherChoix(e.choix);
+      else if (e.t === "info" || e.t === "erreur") ajouter("info", e.message);
       else if (e.t === "etat" && e.etat === "budget") ajouter("info", "Cette discussion a atteint son plafond de dépense. Cliquez sur « Nouvelle discussion » pour continuer.");
       else if (e.t === "etat" && e.etat === "termine") ajouter("info", "Cette discussion est terminée. La prochaine demande en ouvrira une nouvelle.");
     }
   }
   travail(false);
-  $("texte").focus();
+  if (!attente) $("texte").focus();
 }
 
 function afficherConnexion() {
@@ -194,7 +236,8 @@ async function afficherDiscussion() {
   if (r.status === 401) return afficherConnexion();
   const d = await r.json();
   for (const b of d.historique || []) ajouter(b.role, b.texte);
-  if (d.enCours) lireFlux(await api("suivre"));
+  if (d.choix) afficherChoix(d.choix);
+  else if (d.enCours) lireFlux(await api("suivre"));
   else $("texte").focus();
 }
 
@@ -210,7 +253,7 @@ $("form-code").addEventListener("submit", async (ev) => {
 $("form-message").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const texte = $("texte").value.trim();
-  if (!texte || occupe) return;
+  if (!texte || occupe || attente) return;
   $("texte").value = "";
   ajouter("moi", texte);
   travail(true, "Claude lit votre demande…");
@@ -223,10 +266,10 @@ $("texte").addEventListener("keydown", (ev) => {
 });
 
 $("nouvelle").addEventListener("click", async () => {
-  if (occupe && !confirm("Claude travaille encore. Commencer quand même une nouvelle discussion ?")) return;
+  if ((occupe || attente) && !confirm("Une modification est en cours. Commencer quand même une nouvelle discussion ?")) return;
   await api("nouvelle");
-  fil.querySelectorAll(".bulle").forEach((n) => n.remove());
-  $("accueil").hidden = false;
+  fil.querySelectorAll(".bulle:not(#accueil), .choix").forEach((n) => n.remove());
+  bloquerSaisie(false);
   travail(false);
 });
 

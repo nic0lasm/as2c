@@ -25,8 +25,8 @@ pas des fichiers.
 4. **Vérifier** avec `python3 outils/verifier.py` : aucune nouvelle erreur.
 5. **Noter** la modification en haut de la liste dans `JOURNAL.md` : date, demande, pages modifiées.
 6. **Publier** : un envoi sur `main` qui touche `www/` met le site en ligne en une à cinq minutes. Depuis la
-   page d'édition, l'agent pousse sur `main` après l'accord de Sébastien. Dans une autre session, suis la
-   consigne de la personne (envoi direct ou demande de fusion).
+   page d'édition, l'agent prépare une branche `modif/…` et c'est Sébastien qui choisit, par un bouton, de la
+   publier ou de la faire relire par Nico. Dans une autre session, suis la consigne de la personne.
 
 ## Annuler une modification
 
