@@ -1,0 +1,29 @@
+# Prévient Nico par une mention (donc un e-mail de GitHub) quand Sébastien demande une relecture
+# depuis la page d'édition. La demande est ouverte avec le jeton de Nico, et GitHub ne notifie pas
+# quelqu'un de ses propres actions : la mention vient donc du robot GitHub Actions.
+name: Demande de relecture
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  prevenir:
+    if: startsWith(github.head_ref, 'modif/') && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mention de Nico
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMERO: ${{ github.event.pull_request.number }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          if [ "$ACTION" = "opened" ]; then
+            texte="@nic0lasm Sébastien te demande de relire cette modification, préparée depuis la page d'édition. Fusionne la demande pour la publier sur le site, ou ferme-la pour la refuser."
+          else
+            texte="@nic0lasm Sébastien a mis à jour cette modification."
+          fi
+          gh pr comment "$NUMERO" --repo "$GITHUB_REPOSITORY" --body "$texte"

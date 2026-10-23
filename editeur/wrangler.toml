@@ -1,0 +1,25 @@
+# Worker de la page d'édition, servi sur https://nclsmgr.com/as2c.
+# Déployé par le workflow .github/workflows/editeur.yml, qui fournit AGENT_ID, ENVIRONMENT_ID et les secrets.
+name = "as2c-editeur"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+
+routes = [
+  { pattern = "nclsmgr.com/as2c*", zone_name = "nclsmgr.com" },
+]
+
+[vars]
+DEPOT = "nic0lasm/as2c"
+# Plafond de dépense d'une discussion, en dollars (prix publics de l'API).
+BUDGET_USD = "5"
+
+# Au plus 5 essais de code par minute et par adresse IP.
+[[ratelimits]]
+name = "LIMITE_CONNEXION"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
+
+[observability]
+enabled = true

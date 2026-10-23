@@ -31,7 +31,7 @@ Aucun identifiant OVH n'est stocké ici ni demandé.
 Tous les liens dans les pages s'écrivent donc **sans** `articles/` ni `categories/`.
 
 Couleurs : bleu `#1e3a5f`, bleu foncé `#0f2241`, or `#c8a04a`, fond `#fafaf6`.
-Contact affiché : 04 81 68 50 55 · contact@as2cpatrimoine.com · Villeurbanne.
+Contact affiché : 06 69 06 25 25 · sebastien.maigre@as2c-patrimoine.com · Villeurbanne.
 
 ## 3. Points à traiter (constatés le 13/10/2026)
 1. **Formulaire de contact inactif** : `contact.html` envoie vers `https://formspree.io/f/YOUR_FORM_ID`

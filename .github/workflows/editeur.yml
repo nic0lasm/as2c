@@ -1,0 +1,75 @@
+# Déploie la page d'édition https://nclsmgr.com/as2c (Worker Cloudflare + agent Claude).
+# Lancement à la main seulement (Actions > Éditeur AS2C > Run workflow) : l'agent qui modifie le
+# site peut écrire dans ce dépôt, il ne doit pas pouvoir redéployer son propre code.
+# Secrets du dépôt utilisés : CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, ANTHROPIC_API_KEY,
+# AS2C_GITHUB_TOKEN, CODE_ACCES. Le détail est dans editeur/README.md.
+name: Éditeur AS2C
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency: editeur
+
+jobs:
+  deployer:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: editeur
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: editeur/package-lock.json
+
+      - name: Contrôle des secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AS2C_GITHUB_TOKEN: ${{ secrets.AS2C_GITHUB_TOKEN }}
+          CODE_ACCES: ${{ secrets.CODE_ACCES }}
+        run: |
+          manquants=""
+          for nom in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID ANTHROPIC_API_KEY AS2C_GITHUB_TOKEN CODE_ACCES; do
+            [ -n "${!nom}" ] || manquants="$manquants $nom"
+          done
+          if [ -n "$manquants" ]; then echo "::error::Secrets manquants :$manquants"; exit 1; fi
+          if [ "${#CODE_ACCES}" -lt 12 ]; then echo "::error::CODE_ACCES doit faire au moins 12 caractères."; exit 1; fi
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+
+      - name: Agent Claude (création ou mise à jour)
+        id: agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/configurer-agent.mjs
+
+      - name: Déploiement du Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: >
+          npx wrangler deploy
+          --var "AGENT_ID:${{ steps.agent.outputs.agent_id }}"
+          --var "ENVIRONMENT_ID:${{ steps.agent.outputs.environment_id }}"
+
+      - name: Secrets du Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AS2C_GITHUB_TOKEN: ${{ secrets.AS2C_GITHUB_TOKEN }}
+          CODE_ACCES: ${{ secrets.CODE_ACCES }}
+        run: |
+          fichier="$RUNNER_TEMP/secrets.json"
+          trap 'rm -f "$fichier"' EXIT
+          node -e 'const e = process.env; require("fs").writeFileSync(process.argv[1], JSON.stringify({ ANTHROPIC_API_KEY: e.ANTHROPIC_API_KEY, AS2C_GITHUB_TOKEN: e.AS2C_GITHUB_TOKEN, CODE_ACCES: e.CODE_ACCES }), { mode: 0o600 })' "$fichier"
+          npx wrangler secret bulk "$fichier"
