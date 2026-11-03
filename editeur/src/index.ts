@@ -16,6 +16,7 @@ import {
   verifier,
   type Jeton,
 } from "./auth";
+import { consommation, consommationVide, type Usage } from "./consommation";
 import { GitHub, brancheValide, type Proposition, type Resultat } from "./github";
 import { page } from "./page";
 
@@ -131,7 +132,7 @@ async function routeConnectee(
 ): Promise<Response> {
   switch (route) {
     case "etat":
-      return etat(client, jeton);
+      return etat(client, jeton, env);
     case "nouvelle":
       return json({ ok: true }, 200, { "Set-Cookie": cookie(await signer(cle, { exp: jeton.exp }), jeton.exp - maintenant) });
     case "message":
@@ -171,6 +172,8 @@ interface Evenement {
   custom_tool_use_id?: string;
   evaluated_permission?: string;
   stop_reason?: { type: string; event_ids?: string[] };
+  usage?: Usage;
+  budget?: { max_list_cost: { amount: string; currency: string } } | null;
 }
 
 interface Bulle {
@@ -221,21 +224,23 @@ async function relire(client: Anthropic, sid: string): Promise<{ historique: Bul
   return { historique, enAttente, choisis };
 }
 
-async function etat(client: Anthropic, jeton: Jeton): Promise<Response> {
-  if (!jeton.sid) return json({ connecte: true, historique: [], enCours: false });
+async function etat(client: Anthropic, jeton: Jeton, env: Env): Promise<Response> {
+  const vide = { connecte: true, historique: [], enCours: false, conso: consommationVide(env.BUDGET_USD) };
+  if (!jeton.sid) return json(vide);
   try {
     const session = await client.beta.sessions.retrieve(jeton.sid);
-    if (session.status === "terminated") return json({ connecte: true, historique: [], enCours: false });
+    if (session.status === "terminated") return json(vide);
     const { historique, enAttente } = await relire(client, jeton.sid);
     return json({
       connecte: true,
       historique,
       choix: enAttente,
       enCours: !enAttente && (session.status === "running" || session.status === "rescheduling"),
+      conso: consommation(session.usage, session.budget),
     });
   } catch (erreur) {
     console.error("Lecture de la discussion impossible", erreur);
-    return json({ connecte: true, historique: [], enCours: false });
+    return json(vide);
   }
 }
 
@@ -408,6 +413,8 @@ function flux(
               ],
             });
           }
+        } else if (e.type === "session.usage") {
+          await ecrire({ t: "conso", conso: consommation(e.usage, e.budget) });
         } else if (e.type === "session.error") {
           await ecrire({ t: "erreur", message: "Un incident est survenu côté Claude. Il réessaie si possible." });
         } else if (e.type === "session.status_terminated") {
@@ -435,6 +442,13 @@ function flux(
     } catch (erreur) {
       console.error("Relais interrompu", erreur);
       await ecrire({ t: "erreur", message: "La liaison avec Claude a été interrompue. Rechargez la page." }).catch(() => {});
+    }
+    // Les événements session.usage sont périodiques : on relit le total exact une fois le tour fini.
+    try {
+      const session = await client.beta.sessions.retrieve(sid);
+      await ecrire({ t: "conso", conso: consommation(session.usage, session.budget) });
+    } catch (erreur) {
+      console.error("Lecture de la consommation impossible", erreur);
     } finally {
       clearInterval(battement);
       await ecrivain.close().catch(() => {});

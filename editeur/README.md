@@ -30,6 +30,8 @@ Navigateur ──► Cloudflare, route nclsmgr.com/as2c* ──► Worker as2c-e
 - Le code d'accès donne un cookie signé valable 30 jours (HttpOnly, Secure, SameSite=Strict, limité à `/as2c`).
   Cinq essais par minute et par adresse IP au plus. Changer le code déconnecte tout le monde.
 - Chaque discussion est une session de l'agent, plafonnée à `BUDGET_USD` dollars (5 par défaut, `wrangler.toml`).
+  Une barre sous l'en-tête de la page affiche ce que la discussion a consommé : tokens, dépense au prix
+  public et part du plafond. Elle suit les relevés `session.usage` de l'agent et se recale à la fin de chaque réponse.
 - Les consignes de l'agent sont dans [agent/consignes.md](agent/consignes.md).
 - Les discussions se relisent dans la console Anthropic (Managed Agents > Sessions).
 
