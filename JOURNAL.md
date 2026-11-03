@@ -5,6 +5,13 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 
 ---
 
+## 03/11/2026 — Retrait du mot « indépendant » pour décrire AS2C
+- Demande : l'organisme de contrôle considère qu'AS2C n'est pas complètement indépendant ; ne plus présenter le cabinet comme « indépendant » (le conseil « indépendant » est réservé aux conseillers rémunérés uniquement par honoraires).
+- Remplacements : « cabinet indépendant » → « cabinet autonome » (bas de page des 187 pages, descriptions Google) ; accueil : « Cabinet de gestion de patrimoine à Lyon », « Autonome et membre de la CNCGP », « 100 % sur mesure » ; « Qui sommes-nous » : « crée son propre cabinet », et la phrase « n'a pas d'intérêt financier… » réécrite ; FAQ et une quinzaine d'articles : « conseil objectif », « en toute autonomie », « expert en patrimoine », « membre de la CNCGP » au lieu de « certifié/agréé » dans ces phrases.
+- Non modifiés : les articles où « indépendant » décrit les clients (juriste, coach sportif…), les adresses web des articles.
+- Fichiers du site modifiés : 187 pages HTML et `www/search-index.json`.
+- Proposition détaillée : https://claude.ai/artifact/8cmYVSpwfrna3sToxQTq7j
+
 ## 03/11/2026 — Chiffre « 2 » de AS2C à la taille des lettres
 - Demande : que le « 2 » de « AS2C » ait la même taille que les lettres A, S et C (la police des titres affichait des chiffres de hauteur minuscule).
 - Fichiers du site modifiés : `www/assets/css/style.css` (chiffres à hauteur de majuscule), version du style passée à `?v=5` dans les 187 pages.
