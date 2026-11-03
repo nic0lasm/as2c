@@ -35,6 +35,12 @@ export function page(nonce: string): string {
       <button type="button" id="deconnexion" class="discret">Quitter</button>
     </nav>
   </header>
+  <div id="conso" class="conso" hidden>
+    <p class="conso-ligne"><span id="conso-titre">Consommation de cette discussion</span><span id="conso-texte"></span></p>
+    <div class="jauge" role="progressbar" aria-labelledby="conso-titre" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="conso-barre" class="jauge-barre"></div>
+    </div>
+  </div>
   <section id="fil" aria-live="polite">
     <div class="bulle claude" id="accueil">
       <p><strong>Bonjour Sébastien,</strong> je suis votre assistant personnel pour le site AS2C. Je m'occupe de le modifier pour vous, selon vos instructions.</p>
@@ -77,6 +83,13 @@ input:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--or)
 header { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--bord); }
 header strong { color: var(--bleu); margin-right: 10px; }
 header a { color: var(--gris); font-size: .9rem; }
+.conso { padding: 8px 16px 10px; border-bottom: 1px solid var(--bord); }
+.conso-ligne { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; margin: 0 0 6px; font-size: .85rem; color: var(--gris); }
+#conso-texte { font-variant-numeric: tabular-nums; }
+.jauge { height: 8px; border-radius: 4px; background: #ecebe4; overflow: hidden; }
+.jauge-barre { height: 100%; width: 0; background: var(--or); transition: width .4s ease; }
+.jauge-barre.haut { background: #d97706; }
+.jauge-barre.plein { background: #b42318; }
 #fil { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .choix { align-self: stretch; background: #fff; border: 2px solid var(--or); border-radius: 12px; padding: 14px 16px; }
 .choix h2 { margin: 0 0 6px; font-size: 1rem; color: var(--bleu); }
@@ -104,7 +117,7 @@ header a { color: var(--gris); font-size: .9rem; }
 #form-message { display: flex; gap: 8px; align-items: flex-end; padding: 12px 16px 16px; border-top: 1px solid var(--bord); }
 #form-message textarea { resize: none; max-height: 40vh; }
 @media (max-width: 560px) { header { flex-wrap: wrap; } .bulle { max-width: 100%; } }
-@media (prefers-reduced-motion: reduce) { .point { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .point { animation: none; } .jauge-barre { transition: none; } }
 `;
 
 const SCRIPT = `
@@ -149,6 +162,30 @@ function ajouter(role, texte) {
   fil.appendChild(div);
   fil.scrollTop = fil.scrollHeight;
 }
+
+// Barre de consommation : jetons utilisés et part du plafond de dépense de la discussion.
+const nombre = new Intl.NumberFormat("fr-FR");
+const dollars = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", currencyDisplay: "narrowSymbol" });
+function afficherConso(c) {
+  if (!c) return;
+  const morceaux = [nombre.format(c.tokens) + " tokens"];
+  let part = null;
+  if (c.centimes !== null && c.plafond) {
+    part = Math.min(100, Math.round((c.centimes / c.plafond) * 100));
+    morceaux.push(dollars.format(c.centimes / 100) + " sur " + dollars.format(c.plafond / 100) + " (" + part + " %)");
+  }
+  $("conso-texte").textContent = morceaux.join(" · ");
+  const barre = $("conso-barre");
+  barre.parentElement.hidden = part === null;
+  if (part !== null) {
+    barre.style.width = part + "%";
+    barre.classList.toggle("haut", part >= 60 && part < 90);
+    barre.classList.toggle("plein", part >= 90);
+    barre.parentElement.setAttribute("aria-valuenow", String(part));
+  }
+  $("conso").hidden = false;
+}
+let plafondConnu = null;
 
 function travail(actif, texte) {
   occupe = actif;
@@ -214,6 +251,7 @@ async function lireFlux(reponse) {
       if (e.t === "texte") { ajouter("claude", e.texte); travail(true); }
       else if (e.t === "outil") travail(true, e.resume + "…");
       else if (e.t === "choix") afficherChoix(e.choix);
+      else if (e.t === "conso") afficherConso(e.conso);
       else if (e.t === "info" || e.t === "erreur") ajouter("info", e.message);
       else if (e.t === "etat" && e.etat === "budget") ajouter("info", "Cette discussion a atteint son plafond de dépense. Cliquez sur « Nouvelle discussion » pour continuer.");
       else if (e.t === "etat" && e.etat === "termine") ajouter("info", "Cette discussion est terminée. La prochaine demande en ouvrira une nouvelle.");
@@ -235,6 +273,7 @@ async function afficherDiscussion() {
   const r = await api("etat");
   if (r.status === 401) return afficherConnexion();
   const d = await r.json();
+  if (d.conso) { plafondConnu = d.conso.plafond; afficherConso(d.conso); }
   for (const b of d.historique || []) ajouter(b.role, b.texte);
   if (d.choix) afficherChoix(d.choix);
   else if (d.enCours) lireFlux(await api("suivre"));
@@ -271,6 +310,7 @@ $("nouvelle").addEventListener("click", async () => {
   fil.querySelectorAll(".bulle:not(#accueil), .choix").forEach((n) => n.remove());
   bloquerSaisie(false);
   travail(false);
+  afficherConso({ tokens: 0, centimes: 0, plafond: plafondConnu });
 });
 
 $("arreter").addEventListener("click", () => api("arreter"));
