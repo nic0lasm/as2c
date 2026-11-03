@@ -5,6 +5,11 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 
 ---
 
+## 03/11/2026 — Chiffre « 2 » de AS2C à la taille des lettres
+- Demande : que le « 2 » de « AS2C » ait la même taille que les lettres A, S et C (la police des titres affichait des chiffres de hauteur minuscule).
+- Fichiers du site modifiés : `www/assets/css/style.css` (chiffres à hauteur de majuscule), version du style passée à `?v=5` dans les 187 pages.
+- Préparé depuis la page d'édition.
+
 ## 23/10/2026 — Citation de la page d'accueil
 - Demande : remplacer « autant que j'apprécie de vous le fournir » par « autant que j'apprécie vous le fournir » dans la citation de l'accueil.
 - Fichiers du site modifiés : `www/index.html`.
