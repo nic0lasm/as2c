@@ -5,6 +5,11 @@ Les heures des sauvegardes sont en heure UTC (heure française moins 2 h en ét�
 
 ---
 
+## 03/11/2026 — « offert » devient « gratuit », « Sébastien » devient « le cabinet »
+- Demande : dans les textes de prise de rendez-vous, remplacer « offert » par « gratuit » et « Sébastien » par « le cabinet ».
+- Fichiers du site modifiés : `www/contact.html` (texte sous le titre), `www/index.html` (encadré « Prêt à parler de votre projet ? » et carte sur la photo).
+- Préparé depuis la page d'édition.
+
 ## 03/11/2026 — Chiffre « 2 » de AS2C à la taille des lettres
 - Demande : que le « 2 » de « AS2C » ait la même taille que les lettres A, S et C (la police des titres affichait des chiffres de hauteur minuscule).
 - Fichiers du site modifiés : `www/assets/css/style.css` (chiffres à hauteur de majuscule), version du style passée à `?v=5` dans les 187 pages.
